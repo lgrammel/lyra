@@ -25,6 +25,7 @@ function MarkGroup(type)
 	}
 
 }
+
 function Scale(scaleobj, colorscale, type, columnName)
 {
 	this.scaleobj = scaleobj;
@@ -82,7 +83,7 @@ $(document).ready(function(){
 		for (var i in response) {
 			allData[i]={};
 			for(var attr in response[0]) {
-				if(attr==="ISO Country code" || attr === "Country name" || attr === "Continent") {
+				if(attr==="ISO country code" || attr === "Country name" || attr === "Continent") {
 					allData[i][attr] = response[i][attr];
 				} else {
 					allData[i][attr] = +response[i][attr]; //data holds number
@@ -116,7 +117,8 @@ $(document).ready(function(){
 				{
 					positionMarkAttachments($(this).attr("id"));			
 				});		
-				$(".menudiv").show(); //show available attribute encoders					
+				$(".menudiv").show(); //show available attribute encoders	
+				$(".textanchor").show();
 			},
 			stop:function(event,ui){
 				$(".menudiv").hide(500); //necessary or drop won't register
@@ -227,6 +229,15 @@ var createAnnotations = function(markID,markcount)
 {
 	var closeicon;
 	
+	createCloseIcon(markcount);
+	
+	createAxisAnchors(markcount);
+
+	createTextAnchors(markcount);
+}
+
+var createCloseIcon = function(markcount)
+{
 	// make close icon
 	closeicon=$("<div class=\"closeicon\" id=\"closeicon_"+markcount+"\" style=\"position:absolute;\"></div>");
 	
@@ -244,7 +255,12 @@ var createAnnotations = function(markID,markcount)
 	
 	closeicon.appendTo($("body"));
 	closeicon.hide();
-	
+
+}
+
+
+var createAxisAnchors = function(markcount)
+{
 	var axisanchor;
 	
 	for(var axisanchornum=0; axisanchornum<4; axisanchornum++)
@@ -314,12 +330,120 @@ var createAnnotations = function(markID,markcount)
 		axisanchor.appendTo($("body"));
 		axisanchor.hide();
 	}
-
-
 }
 
+var createTextAnchors = function(markcount)
+{
+	var textanchor;
+	
+	for(var textanchornum=0; textanchornum<3; textanchornum++)
+	{
+		textanchor =  $("<div class=\"textanchor textanchor_"+markcount+"\" id=\"textanchor_"+markcount+"_"+textanchornum+"\" style=\"position:absolute;\"></div>")
+	
+		textanchor.droppable({
+			accept:".column",
+			drop:function(event,ui)
+			{
+			// create axis
+				var myid = $(this).attr("id");
+				var marknum = myid.split("_")[1];
+				var anchornum = +myid.split("_")[2];
+
+				// no double notes
+//				if($("#text_"+marknum+"_"+anchornum).length > 0) return;
+
+				// bounce out for weird axes
+//				if(markGroups[marknum].majorParameter==="width" && (anchornum===1 || anchornum===3)) return;
+//				if(markGroups[marknum].majorParameter==="height" && (anchornum===0 || anchornum===2)) return;	
+						
+				var colname = ui.draggable.text(); //column name of data		
+				var datacolumn = dataObjectsToColumn(allData,colname);
+
+				
+				var markgroup = d3.select(".mark"+marknum);
+				markgroup.selectAll(".text_"+marknum+"_"+anchornum).data(datacolumn).enter().append("text").classed("text",true)
+				.classed("text_"+marknum,true)
+				.classed("text_"+marknum+"_"+anchornum,true);
+	
+	
+	
+				var textelems = svgm.selectAll(".text_"+marknum+"_"+anchornum);
+				
+					
+				textelems.attr("id",function(d,i){ return "text_"+marknum+"_"+anchornum+"_"+i;});
+				textelems.text(function(d,i){ return d;});
+				
+				positionTextAnnotations(marknum);
+				
+
+/*				for(var textanchornum=0; textanchornum<3; textanchornum++)
+				{
+					var anchor = $("#textanchor_"+marknum+"_"+textanchornum);	
+					var x,y;
+
+					x = minx+visarea.offset().left+ +curmark.attr("x")+"px";
+					switch(textanchornum){
+						case 0:
+							// top
+							y = miny+ visarea.offset().top + +curmark.attr("y") - 10 + "px";
+						break;
+						case 1:
+							// middle
+							y = miny+visarea.offset().top + +curmark.attr("y") + .5*+curmark.attr("height")+"px";
+						break;
+						case 2:
+							// bottom
+							y = miny+visarea.offset().top + +curmark.attr("y") + +curmark.attr("height") + "px";		
+						break;
+									
+					}
+				
+					anchor.css("left",x);
+					anchor.css("top", y);
+				}
+				
+				// make the axis itself draggable for customization / deletion
+				$(text[0][0]).draggable(
+				{
+					drag:function(e, ui)
+					{
+
+				//		tSpecs2 = transformSpecs(e.target);
+						
+						dx = parseInt(ui.position.left - mouseX2);
+						dy = parseInt(ui.position.top - mouseY2);
+
+						var target;
+						target=d3.select(this);
+						console.log
+						var marknum = $(this).attr("id").split("_")[1];	
 
 
+						t = "translate(" + parseInt(groupX2+dx) + "," + parseInt(groupY2+dy) + ") ";
+						$(e.target).attr("transform", t);					
+					},
+					start: function(e, ui) {
+					//	isDragging = true;
+						tSpecs2 = transformSpecs(e.target);					
+						mouseX2 = parseInt(ui.position.left);
+						mouseY2 = parseInt(ui.position.top);
+
+						groupX2 = parseInt(tSpecs2[0]);
+						groupY2 = parseInt(tSpecs2[1]);
+					}
+				});
+			*/
+				
+	//		positionAxis($(axisgroup[0][0]));
+				
+			},
+			tolerance:"pointer"
+		});
+	
+		textanchor.appendTo($("body"));
+		textanchor.hide();
+	}
+}
 
 var createMenus=function(markID,markcount) {
 	
@@ -399,6 +523,8 @@ var positionAnnotations = function(marknum)
 {
 	positionCloseIcon(marknum);
 	positionAxisAnchor(marknum);
+	positionTextAnchors(marknum);
+	positionTextAnnotations(marknum);
 
 }
 
@@ -431,6 +557,109 @@ var positionCloseIcon = function(marknum)
 		icon.css("left",(minx+visarea.offset().left+Math.cos(45)*radius)+"px");
 		icon.css("top",miny+visarea.offset().top-Math.sin(45)*radius+"px");	
 	}
+
+}
+
+var positionTextAnchors = function(marknum)
+{
+	var markgroup = d3.select(".mark"+marknum);		
+	var cleantrans = markgroup.attr("transform").substring(10).split(")")[0].split(",");
+	var wh = getDimensions($("g.mark"+marknum));
+	var minx = +cleantrans[0];
+	var miny = +cleantrans[1];
+	var visarea = $("#vis");
+	var type = markGroups[marknum].type;
+
+	if(type==="rect"){
+	
+//		var thismark = markgroup.selectAll("rect").each(function(i){
+		var curmark = d3.select(markgroup.selectAll("rect.realmark")[0][0]);
+	//	console.log(curmark);
+	//		var curmark = d3.select(this);
+			
+			for(var textanchornum=0; textanchornum<3; textanchornum++)
+			{
+				var anchor = $("#textanchor_"+marknum+"_"+textanchornum);	
+				var x,y;
+
+				x = minx+visarea.offset().left+ +curmark.attr("x")+"px";
+				switch(textanchornum){
+					case 0:
+						// top
+						y = miny+ visarea.offset().top + +curmark.attr("y") - 10 + "px";
+					break;
+					case 1:
+						// middle
+						y = miny+visarea.offset().top + +curmark.attr("y") + .5*+curmark.attr("height")+"px";
+					break;
+					case 2:
+						// bottom
+						y = miny+visarea.offset().top + +curmark.attr("y") + +curmark.attr("height") + "px";		
+					break;
+								
+				}
+			
+				anchor.css("left",x);
+				anchor.css("top", y);
+			}
+//		});
+	}
+
+
+}
+
+var positionTextAnnotations = function(marknum)
+{
+				var markgroup = d3.select(".mark"+marknum);
+//				var textelems = markgroup.selectAll(".text")
+	
+//				if(textelems[0].length < 1) return;
+				
+				markgroup.selectAll("rect.realmark").each(function(d,i)
+				{
+					var curmark = d3.select(this);
+					var myx = +d3.select(this).attr("x");
+					var myy = +d3.select(this).attr("y");	
+					var x;
+					var y;
+					var wh = getDimensions($("g.mark"+marknum));
+
+					for(var anchornum=0; anchornum<3; anchornum++){
+					
+						var textelems = markgroup.selectAll(".text_"+marknum+"_"+anchornum);
+						
+						if(textelems[0].length < 1) continue;
+						
+						
+						var textbbox = getDimensions($(textelems[0][i]));
+						
+						var textanchornum = +d3.select(textelems[0][i]).attr("id").split("_")[2];		
+
+						
+						x=myx + .5*(wh[0]/n-textbbox[0]); // + .5*wh[0]/n;
+						y=myy;
+	//					console.log(wh[0] + " " + textbbox[0]);
+						
+						switch(textanchornum){
+							case 0:
+								// top
+								y = myy - 5;
+							break;
+							case 1:
+								// middle
+								y = myy + .5*Math.floor(+curmark.attr("height"));
+							break;
+							case 2:
+								// bottom
+								y = myy + Math.floor(+curmark.attr("height")) + 15;		
+							break;
+										
+						}
+
+						
+						d3.select(textelems[0][i]).transition().duration(0).attr("x",x).attr("y",y);
+					}
+				});
 
 }
 
@@ -939,7 +1168,8 @@ function getDimensions(shapes) {
 	shapes=shapes[0];
 	var bb = shapes.getBBox();
 	// handle axis width here?
-	return [bb["width"]-bb["x"], bb["height"]-bb["y"]];
+//	return [bb["width"], bb["height"]]; // TODO: remove x,y?	
+	return [bb["width"]-bb["x"], bb["height"]-bb["y"]]; // TODO: remove x,y?
 }
 
 
@@ -1088,7 +1318,7 @@ var updateRectMarks = function(marknum, newwidth, newheight, parameter, colname,
 		var marks = svgm.selectAll("g.mark"+marknum+" rect.realmark")
 		.attr("height",newheight)
 		.attr("width",newwidth)	
-		console.log(marks);
+	//	console.log(marks);
 	
 	}
 	else
@@ -1382,8 +1612,27 @@ var updateBackgroundHighlight=function(marknum, opacity)
 	container.attr("height",0);
 	container.attr("width",0);
 	
-	var bbox = getDimensions($(group[0][0]));
+//	var tempxs=[],tempys=[];
+//	var textmarks = group.selectAll(".text_"+marknum);
 
+//	textmarks.attr("opacity",0);
+	
+	/*
+	if(textmarks[0].length > 1) {
+		textmarks.each(function(d,i)
+		{
+			var me = d3.select(this);
+			tempxs[i]=me.attr("x");
+			me.attr("x",20);
+			tempys[i]=me.attr("y");
+			me.attr("y",20);
+		});
+	} */
+	var bbox = getDimensions($(group[0][0]));
+	
+//	textmarks.attr("opacity",1);
+//	positionTextAnnotations(marknum);
+	
 	if(markGroups[marknum].type==="arc")
 	{
 		container.attr("r",(markGroups[marknum].radius)+5)

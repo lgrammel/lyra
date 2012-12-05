@@ -98,11 +98,14 @@ display: none;
 
 .menudiv{
 	background: none;
-
+	border-width: 1;
+	border-color: black;
 }
 
 .optiondiv{
 	background: none;
+	border-width: 1;
+	border-color: black;
 
 }
 
@@ -129,6 +132,19 @@ display: none;
 .optionselected{
 	color: black;
 	background: khaki;
+
+}
+.textanchor{
+	background: orange;
+    width: 15px;
+    height: 15px;
+    cursor: default;
+	border-color: black;
+	border-width: 2;
+	text-align: center;
+	vertical-align: center;
+	opacity: .7;
+	user-select: none;
 
 }
 .axisanchor{
