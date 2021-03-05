@@ -528,7 +528,7 @@
     };
     groups.ease = function(value) {
       if (!arguments.length) return ease;
-      ease = typeof value === "function" ? value : d3.ease.apply(d3, arguments);
+      ease = typeof value === "function" ? value : d3.ease(...arguments);
       return groups;
     };
     groups.each = function(type, listener) {
@@ -752,7 +752,7 @@
     return extent;
   }
   function d3_scale_linearTicks(domain, m) {
-    return d3.range.apply(d3, d3_scale_linearTickRange(domain, m));
+    return d3.range(...d3_scale_linearTickRange(domain, m));
   }
   function d3_scale_linearTickFormat(domain, m) {
     return d3.format(",." + Math.max(0, -Math.floor(Math.log(d3_scale_linearTickRange(domain, m)[2]) / Math.LN10 + .01)) + "f");
@@ -1928,29 +1928,29 @@
   }
   function d3_geo_boundsLineString(o, f) {
     for (var a = o.coordinates, i = 0, n = a.length; i < n; i++) {
-      f.apply(null, a[i]);
+      f(...a[i]);
     }
   }
   function d3_geo_boundsMultiLineString(o, f) {
     for (var a = o.coordinates, i = 0, n = a.length; i < n; i++) {
       for (var b = a[i], j = 0, m = b.length; j < m; j++) {
-        f.apply(null, b[j]);
+        f(...b[j]);
       }
     }
   }
   function d3_geo_boundsMultiPolygon(o, f) {
     for (var a = o.coordinates, i = 0, n = a.length; i < n; i++) {
       for (var b = a[i][0], j = 0, m = b.length; j < m; j++) {
-        f.apply(null, b[j]);
+        f(...b[j]);
       }
     }
   }
   function d3_geo_boundsPoint(o, f) {
-    f.apply(null, o.coordinates);
+    f(...o.coordinates);
   }
   function d3_geo_boundsPolygon(o, f) {
     for (var a = o.coordinates[0], i = 0, n = a.length; i < n; i++) {
-      f.apply(null, a[i]);
+      f(...a[i]);
     }
   }
   function d3_geo_greatArcSource(d) {
@@ -2749,7 +2749,7 @@
     return e ? v + e * (values[h] - v) : v;
   };
   d3.transpose = function(matrix) {
-    return d3.zip.apply(d3, matrix);
+    return d3.zip(...matrix);
   };
   d3.zip = function() {
     if (!(n = arguments.length)) return [];
@@ -3127,7 +3127,7 @@
     var i = name.indexOf("-"), t = i >= 0 ? name.substring(0, i) : name, m = i >= 0 ? name.substring(i + 1) : "in";
     t = d3_ease.get(t) || d3_ease_default;
     m = d3_ease_mode.get(m) || d3_ease_identity;
-    return d3_ease_clamp(m(t.apply(null, Array.prototype.slice.call(arguments, 1))));
+    return d3_ease_clamp(m(t(...Array.prototype.slice.call(arguments, 1))));
   };
   d3.event = null;
   d3.transform = function(string) {
@@ -4378,7 +4378,7 @@
     function axis(g) {
       g.each(function() {
         var g = d3.select(this);
-        var ticks = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments_) : scale.domain() : tickValues, tickFormat = tickFormat_ == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments_) : String : tickFormat_;
+        var ticks = tickValues == null ? scale.ticks ? scale.ticks(...tickArguments_) : scale.domain() : tickValues, tickFormat = tickFormat_ == null ? scale.tickFormat ? scale.tickFormat(...tickArguments_) : String : tickFormat_;
         var subticks = d3_svg_axisSubdivide(scale, ticks, tickSubdivide), subtick = g.selectAll(".minor").data(subticks, String), subtickEnter = subtick.enter().insert("line", "g").attr("class", "tick minor").style("opacity", 1e-6), subtickExit = d3.transition(subtick.exit()).style("opacity", 1e-6).remove(), subtickUpdate = d3.transition(subtick).style("opacity", 1);
         var tick = g.selectAll("g").data(ticks, String), tickEnter = tick.enter().insert("g", "path").style("opacity", 1e-6), tickExit = d3.transition(tick.exit()).style("opacity", 1e-6).remove(), tickUpdate = d3.transition(tick).style("opacity", 1), tickTransform;
         var range = d3_scaleRange(scale), path = g.selectAll(".domain").data([ 0 ]), pathEnter = path.enter().append("path").attr("class", "domain"), pathUpdate = d3.transition(path);
